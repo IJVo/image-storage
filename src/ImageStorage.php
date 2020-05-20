@@ -187,7 +187,7 @@ class ImageStorage
 
 		if (!$identifier) {
 			$is_no_image = false;
-			[$script, $file] = $this->getNoImage(false);
+			[$script, $file] = $this->getNoImageA();
 		} else {
 			$script = ImageNameScript::fromIdentifier($identifier);
 
@@ -195,7 +195,7 @@ class ImageStorage
 
 			if (!file_exists($file)) {
 				$is_no_image = true;
-				[$script, $file] = $this->getNoImage(false);
+				[$script, $file] = $this->getNoImageA();
 			}
 		}
 
@@ -279,6 +279,43 @@ class ImageStorage
 
 		if ($return_image) {
 			return new Image($this->friendly_url, $this->data_dir, $this->data_path, $this->noimage_identifier);
+		}
+
+		return [$script, $file];
+	}
+
+
+	/**
+	 * @throws ImageStorageException
+	 */
+	public function getNoImageA(): Array
+	{
+		$script = ImageNameScript::fromIdentifier($this->noimage_identifier);
+		$file = implode('/', [$this->data_path, $script->original]);
+
+		if (!file_exists($file)) {
+			$identifier = '_storage_no_image/8f/no_image.png';
+			$new_path = sprintf('%s/%s', $this->data_path, $identifier);
+
+			if (!file_exists($new_path)) {
+				$dirName = dirname($new_path);
+
+				if (!file_exists($dirName)) {
+					mkdir($dirName, 0777, true);
+				}
+
+				if (!file_exists($dirName) || !is_writable($dirName)) {
+					throw new ImageStorageException('Could not create default no_image.png. ' . $dirName . ' does not exist or is not writable.');
+				}
+
+				$data = base64_decode(require __DIR__ . '/NoImageSource.php');
+				$_image = NetteImage::fromString($data);
+				$_image->save($new_path, $script->quality ?: $this->quality);
+			}
+
+			$script = ImageNameScript::fromIdentifier($identifier);
+
+			return [$script, $new_path];
 		}
 
 		return [$script, $file];
