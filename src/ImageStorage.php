@@ -1,4 +1,4 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
 
 namespace Contributte\ImageStorage;
 
@@ -37,6 +37,9 @@ class ImageStorage
 	/** @var string */
 	private $noimage_identifier;
 
+	/** @var string */
+	private $default_noimage_identifier = '_storage_no_image/8f/no_image.png';
+
 	/** @var bool */
 	private $friendly_url;
 
@@ -45,22 +48,22 @@ class ImageStorage
 
 	/** @var int[] */
 	private $_image_flags = [
-		'fit' => 0,
-		'fill' => 4,
-		'exact' => 8,
-		'stretch' => 2,
-		'shrink_only' => 1,
+			'fit' => 0,
+			'fill' => 4,
+			'exact' => 8,
+			'stretch' => 2,
+			'shrink_only' => 1,
 	];
 
 	public function __construct(
-		string $data_path,
-		string $data_dir,
-		string $algorithm_file,
-		string $algorithm_content,
-		int $quality,
-		string $default_transform,
-		string $noimage_identifier,
-		bool $friendly_url
+					string $data_path,
+					string $data_dir,
+					string $algorithm_file,
+					string $algorithm_content,
+					int $quality,
+					string $default_transform,
+					string $noimage_identifier,
+					bool $friendly_url
 	)
 	{
 		$this->data_path = $data_path;
@@ -78,9 +81,7 @@ class ImageStorage
 	 */
 	public function delete($arg): void
 	{
-		$script = is_object($arg) && $arg instanceof Image
-			? ImageNameScript::fromIdentifier($arg->identifier)
-			: ImageNameScript::fromName($arg);
+		$script = is_object($arg) && $arg instanceof Image ? ImageNameScript::fromIdentifier($arg->identifier) : ImageNameScript::fromName($arg);
 
 		$pattern = preg_replace('/__file__/', $script->name, ImageNameScript::PATTERN);
 		$dir = implode('/', [$this->data_path, $script->namespace, $script->prefix]);
@@ -103,16 +104,16 @@ class ImageStorage
 		}
 
 		[$path, $identifier] = $this->getSavePath(
-			self::fixName($upload->getName()),
-			$namespace,
-			$checksum
+						self::fixName($upload->getName()),
+						$namespace,
+						$checksum
 		);
 
 		$upload->move($path);
 
 		$image = new Image($this->friendly_url, $this->data_dir, $this->data_path, $identifier, [
-			'sha' => $checksum,
-			'name' => self::fixName($upload->getName()),
+				'sha' => $checksum,
+				'name' => self::fixName($upload->getName()),
 		]);
 
 		return $image;
@@ -134,16 +135,16 @@ class ImageStorage
 		}
 
 		[$path, $identifier] = $this->getSavePath(
-			self::fixName($name),
-			$namespace,
-			$checksum
+						self::fixName($name),
+						$namespace,
+						$checksum
 		);
 
 		file_put_contents($path, $content, LOCK_EX);
 
 		$image = new Image($this->friendly_url, $this->data_dir, $this->data_path, $identifier, [
-			'sha' => $checksum,
-			'name' => self::fixName($name),
+				'sha' => $checksum,
+				'name' => self::fixName($name),
 		]);
 
 		return $image;
@@ -164,7 +165,7 @@ class ImageStorage
 
 		if (count($args) === 1) {
 			if (!file_exists(implode('/', [$this->data_path, $identifier])) || !$identifier) {
-				return $this->getNoImage(true);
+				return $this->getNoImage();
 			}
 
 			return new Image($this->friendly_url, $this->data_dir, $this->data_path, $identifier);
@@ -186,7 +187,6 @@ class ImageStorage
 		$quality = $args[3] ?? $this->quality;
 
 		if (!$identifier) {
-			$is_no_image = false;
 			[$script, $file] = $this->getNoImageA();
 		} else {
 			$script = ImageNameScript::fromIdentifier($identifier);
@@ -194,7 +194,6 @@ class ImageStorage
 			$file = implode('/', [$this->data_path, $script->original]);
 
 			if (!file_exists($file)) {
-				$is_no_image = true;
 				[$script, $file] = $this->getNoImageA();
 			}
 		}
@@ -232,61 +231,30 @@ class ImageStorage
 			$_image->resize($size[0], $size[1], $flag);
 
 			$_image->sharpen()->save(
-				implode('/', [$this->data_path, $identifier]),
-				$quality
+							implode('/', [$this->data_path, $identifier]),
+							$quality
 			);
 		}
 
 		return new Image($this->friendly_url, $this->data_dir, $this->data_path, $identifier, ['script' => $script]);
 	}
 
-	/**
-	 * @throws ImageStorageException
-	 */
-	public function getNoImage(bool $return_image = false): Image
+
+	public function getNoImage(): Image
 	{
 		$script = ImageNameScript::fromIdentifier($this->noimage_identifier);
 		$file = implode('/', [$this->data_path, $script->original]);
 
 		if (!file_exists($file)) {
-			$identifier = '_storage_no_image/8f/no_image.png';
-			$new_path = sprintf('%s/%s', $this->data_path, $identifier);
-
-			if (!file_exists($new_path)) {
-				$dirName = dirname($new_path);
-
-				if (!file_exists($dirName)) {
-					mkdir($dirName, 0777, true);
-				}
-
-				if (!file_exists($dirName) || !is_writable($dirName)) {
-					throw new ImageStorageException('Could not create default no_image.png. ' . $dirName . ' does not exist or is not writable.');
-				}
-
-				$data = base64_decode(require __DIR__ . '/NoImageSource.php');
-				$_image = NetteImage::fromString($data);
-				$_image->save($new_path, $script->quality ?: $this->quality);
-			}
-
-			if ($return_image) {
-				return new Image($this->friendly_url, $this->data_dir, $this->data_path, $identifier);
-			}
-
-			$script = ImageNameScript::fromIdentifier($identifier);
-
-			return [$script, $new_path];
+			$new_path = saveNoImage($script);
+			return new Image($this->friendly_url, $this->data_dir, $this->data_path, $this->default_noimage_identifier);
 		}
-
-		if ($return_image) {
-			return new Image($this->friendly_url, $this->data_dir, $this->data_path, $this->noimage_identifier);
-		}
-
-		return [$script, $file];
+		return new Image($this->friendly_url, $this->data_dir, $this->data_path, $this->noimage_identifier);
 	}
 
 
 	/**
-	 * @throws ImageStorageException
+	 * @return string[]
 	 */
 	public function getNoImageA(): Array
 	{
@@ -294,31 +262,37 @@ class ImageStorage
 		$file = implode('/', [$this->data_path, $script->original]);
 
 		if (!file_exists($file)) {
-			$identifier = '_storage_no_image/8f/no_image.png';
-			$new_path = sprintf('%s/%s', $this->data_path, $identifier);
-
-			if (!file_exists($new_path)) {
-				$dirName = dirname($new_path);
-
-				if (!file_exists($dirName)) {
-					mkdir($dirName, 0777, true);
-				}
-
-				if (!file_exists($dirName) || !is_writable($dirName)) {
-					throw new ImageStorageException('Could not create default no_image.png. ' . $dirName . ' does not exist or is not writable.');
-				}
-
-				$data = base64_decode(require __DIR__ . '/NoImageSource.php');
-				$_image = NetteImage::fromString($data);
-				$_image->save($new_path, $script->quality ?: $this->quality);
-			}
-
+			$new_path = saveNoImage($script);
 			$script = ImageNameScript::fromIdentifier($identifier);
-
 			return [$script, $new_path];
 		}
-
 		return [$script, $file];
+	}
+
+
+	/**
+	 * @throws ImageStorageException
+	 */
+	public function saveNoImage($script): string
+	{
+		$new_path = sprintf('%s/%s', $this->data_path, $this->default_noimage_identifier);
+
+		if (!file_exists($new_path)) {
+			$dirName = dirname($new_path);
+
+			if (!file_exists($dirName)) {
+				mkdir($dirName, 0777, true);
+			}
+
+			if (!file_exists($dirName) || !is_writable($dirName)) {
+				throw new ImageStorageException('Could not create default no_image.png. ' . $dirName . ' does not exist or is not writable.');
+			}
+
+			$data = base64_decode(require __DIR__ . '/NoImageSource.php');
+			$_image = NetteImage::fromString($data);
+			$_image->save($new_path, $script->quality ?: $this->quality);
+		}
+		return $new_path;
 	}
 
 
@@ -356,5 +330,4 @@ class ImageStorage
 	{
 		$this->friendly_url = $friendly_url;
 	}
-
 }
