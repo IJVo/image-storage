@@ -38,7 +38,7 @@ class ImageStorageExtension extends CompilerExtension
 
 	public function beforeCompile(): void
 	{
-		if (version_compare(Latte\Engine::VERSION, '3', '<')) {
+		if (version_compare(\Latte\Engine::VERSION, '3', '<')) {
 			
 		$builder = $this->getContainerBuilder();
 
