@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace Contributte\ImageStorage;
 
@@ -81,7 +82,9 @@ class ImageStorage
 	 */
 	public function delete($arg): void
 	{
-		$script = is_object($arg) && $arg instanceof Image ? ImageNameScript::fromIdentifier($arg->identifier) : ImageNameScript::fromName($arg);
+		$script = is_object($arg) && $arg instanceof Image ?
+		ImageNameScript::fromIdentifier($arg->identifier) :
+		ImageNameScript::fromName($arg);
 
 		$pattern = preg_replace('/__file__/', $script->name, ImageNameScript::PATTERN);
 		$dir = implode('/', [$this->data_path, $script->namespace, $script->prefix]);
@@ -256,7 +259,7 @@ class ImageStorage
 	/**
 	 * @return string[]
 	 */
-	public function getNoImageA(): Array
+	public function getNoImageA(): array
 	{
 		$script = ImageNameScript::fromIdentifier($this->noimage_identifier);
 		$file = implode('/', [$this->data_path, $script->original]);
@@ -288,7 +291,7 @@ class ImageStorage
 				throw new ImageStorageException('Could not create default no_image.png. ' . $dirName . ' does not exist or is not writable.');
 			}
 
-			$data = base64_decode(require __DIR__ . '/NoImageSource.php');
+			$data = base64_decode(require __DIR__ . '/NoImageSource.php', true);
 			$_image = NetteImage::fromString($data);
 			$_image->save($new_path, $script->quality ?: $this->quality);
 		}

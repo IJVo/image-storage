@@ -1,15 +1,17 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Cases;
 
 use Contributte\ImageStorage\Image;
-use Ninjify\Nunjuck\TestCase\BaseTestCase;
 use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-final class ImageTest extends BaseTestCase
+final class ImageTest extends \Tester\TestCase
 {
+
 
 	public function testGetPath(): void
 	{
@@ -17,11 +19,13 @@ final class ImageTest extends BaseTestCase
 		Assert::equal('/data/namespace/47/img.jpg', $image->getPath());
 	}
 
+
 	public function testGetPathNested(): void
 	{
 		$image = new Image(false, '', '/data/images', 'namespace/47/img.jpg');
 		Assert::equal('/data/images/namespace/47/img.jpg', $image->getPath());
 	}
+
 
 	public function testCreateLink(): void
 	{
@@ -29,12 +33,12 @@ final class ImageTest extends BaseTestCase
 		Assert::equal('data/namespace/47/img.jpg', $image->createLink());
 	}
 
+
 	public function testCreateLinkNested(): void
 	{
 		$image = new Image(false, 'data/images', '', 'namespace/47/img.jpg');
 		Assert::equal('data/images/namespace/47/img.jpg', $image->createLink());
 	}
-
 }
 
-(new ImageTest())->run();
+(new ImageTest)->run();

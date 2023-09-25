@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Contributte\ImageStorage\Macros;
 
@@ -10,7 +12,8 @@ use Latte\PhpWriter;
 class Macros extends Latte\Macros\MacroSet
 {
 
-	public static function install(Compiler $compiler): Macros
+
+	public static function install(Compiler $compiler): self
 	{
 		$set = new static($compiler);
 
@@ -58,5 +61,4 @@ class Macros extends Latte\Macros\MacroSet
 	{
 		return $writer->write('$_img = $imageStorage->fromIdentifier(%node.array); echo $baseUrl . "/" . $_img->createLink()');
 	}
-
 }

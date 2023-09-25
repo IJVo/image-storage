@@ -1,8 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Contributte\ImageStorage\DI;
 
 use Contributte\ImageStorage\ImageStorage;
+use Latte;
 use Nette;
 use Nette\DI\CompilerExtension;
 use Nette\Schema\Expect;
@@ -11,19 +14,21 @@ use Nette\Schema\Schema;
 class ImageStorageExtension extends CompilerExtension
 {
 
+
 	public function getConfigSchema(): Schema
 	{
 		return Expect::structure([
-			'data_path' => Expect::string()->required(),
-			'data_dir' => Expect::string()->required(),
-			'algorithm_file' => Expect::string('sha1_file'),
-			'algorithm_content' => Expect::string('sha1'),
-			'quality' => Expect::int(85),
-			'default_transform' => Expect::string('fit'),
-			'noimage_identifier' => Expect::string('noimage/03/no-image.png'),
-			'friendly_url' => Expect::bool(false),
+				'data_path' => Expect::string()->required(),
+				'data_dir' => Expect::string()->required(),
+				'algorithm_file' => Expect::string('sha1_file'),
+				'algorithm_content' => Expect::string('sha1'),
+				'quality' => Expect::int(85),
+				'default_transform' => Expect::string('fit'),
+				'noimage_identifier' => Expect::string('noimage/03/no-image.png'),
+				'friendly_url' => Expect::bool(false),
 		]);
 	}
+
 
 	public function loadConfiguration(): void
 	{
@@ -38,16 +43,16 @@ class ImageStorageExtension extends CompilerExtension
 
 	public function beforeCompile(): void
 	{
-		if (version_compare(\Latte\Engine::VERSION, '3', '<')) {
-			
 		$builder = $this->getContainerBuilder();
 
 		/** @var Nette\DI\Definitions\FactoryDefinition $latteFactory */
 		$latteFactory = $builder->getDefinition('latte.latteFactory');
 		assert($latteFactory instanceof Nette\DI\Definitions\FactoryDefinition);
-		$latteFactory->getResultDefinition()
-			->addSetup('Contributte\ImageStorage\Macros\Macros::install(?->getCompiler())', ['@self']);
+		if (version_compare(Latte\Engine::Version, '3', '<')) {
+			$latteFactory->getResultDefinition()
+				->addSetup('Contributte\ImageStorage\Macros\Macros::install(?->getCompiler())', ['@self']);
+		} else {
+			$latteFactory->getResultDefinition()->addSetup('addExtension', [new \Contributte\ImageStorage\Latte\LatteExtension]);
 		}
 	}
-
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Contributte\ImageStorage;
 
@@ -12,10 +14,12 @@ trait ImageStoragePresenterTrait
 	/** @var ImageStorage */
 	public $imageStorage;
 
+
 	public function injectImageStorage(ImageStorage $imageStorage): void
 	{
 		$this->imageStorage = $imageStorage;
 	}
+
 
 	public function createTemplate(): ITemplate
 	{
@@ -25,7 +29,6 @@ trait ImageStoragePresenterTrait
 
 		return $template;
 	}
-
 }
 
 // phpcs:enable

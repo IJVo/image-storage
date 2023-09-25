@@ -1,15 +1,17 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Cases;
 
 use Contributte\ImageStorage\ImageNameScript;
-use Ninjify\Nunjuck\TestCase\BaseTestCase;
 use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-final class ImageNameScriptTest extends BaseTestCase
+final class ImageNameScriptTest extends \Tester\TestCase
 {
+
 
 	public function testFromName(): void
 	{
@@ -40,9 +42,6 @@ final class ImageNameScriptTest extends BaseTestCase
 		Assert::same($s->getIdentifier(), 'images/ed/kitty.2x2.exact.q2.jpg');
 		Assert::same($s->toQuery(), 'images/ed/2x2.exact.q2/kitty.jpg?_image_storage');
 	}
-
 }
 
-
-$test_case = new ImageNameScriptTest();
-$test_case->run();
+(new ImageNameScriptTest)->run();

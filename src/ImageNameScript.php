@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Contributte\ImageStorage;
 
@@ -11,10 +13,10 @@ class ImageNameScript
 
 	public const PATTERN = '/__file__(\.(\d+)x(\d+)(crop(\d+)x(\d+)x(\d+)x(\d+))?\.(\w+))?(\.q(\d+))?\.([^\.]+)$/';
 
-	/** @var string **/
+	/** @var string */
 	public $identifier;
 
-	/** @var string **/
+	/** @var string */
 	public $original;
 
 	/** @var string */
@@ -26,7 +28,7 @@ class ImageNameScript
 	/** @var string */
 	public $name;
 
-	/** @var int[] **/
+	/** @var int[] */
 	public $size = [];
 
 	/** @var string */
@@ -41,19 +43,20 @@ class ImageNameScript
 	/** @var int[] */
 	public $crop = [];
 
+
 	public function __construct(string $identifier)
 	{
 		$this->identifier = $identifier;
 	}
 
 
-	public static function fromIdentifier(string $identifier): ImageNameScript
+	public static function fromIdentifier(string $identifier): self
 	{
 		return self::fromName($identifier);
 	}
 
 
-	public static function fromName(string $name): ImageNameScript
+	public static function fromName(string $name): self
 	{
 		$pattern = preg_replace('/__file__/', '([^\/]*)\/([^\/]*)\/(.*?)', self::PATTERN);
 		preg_match($pattern, $name, $matches);
@@ -70,7 +73,7 @@ class ImageNameScript
 		$script->extension = $matches[15];
 
 		if ($matches[8] && $matches[9] && $matches[10] && $matches[11]) {
-			$script->crop  = [(int) $matches[8], (int) $matches[9], (int) $matches[10], (int) $matches[11]];
+			$script->crop = [(int) $matches[8], (int) $matches[9], (int) $matches[10], (int) $matches[11]];
 		}
 
 		return $script;
@@ -162,5 +165,4 @@ class ImageNameScript
 			sprintf('%s.%s?_image_storage', $this->name, $this->extension),
 		]);
 	}
-
 }

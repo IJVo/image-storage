@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Contributte\ImageStorage;
 
@@ -30,6 +32,7 @@ class Image
 	/** @var bool */
 	private $friendly_url = false;
 
+
 	/**
 	 * @param mixed[] $props
 	 */
@@ -51,20 +54,24 @@ class Image
 		}
 	}
 
+
 	public function getPath(): string
 	{
 		return implode('/', [$this->data_path, $this->identifier]);
 	}
+
 
 	public function __toString(): string
 	{
 		return $this->identifier;
 	}
 
+
 	public function getQuery(): string
 	{
 		return $this->script->toQuery();
 	}
+
 
 	public function createLink(): string
 	{
@@ -75,9 +82,9 @@ class Image
 		return implode('/', [$this->data_dir, $this->identifier]);
 	}
 
+
 	public function getScript(): ImageNameScript
 	{
 		return $this->script ?: ImageNameScript::fromIdentifier($this->identifier);
 	}
-
 }

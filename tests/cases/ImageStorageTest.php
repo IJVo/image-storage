@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Cases;
 
@@ -6,18 +8,18 @@ use Contributte\ImageStorage\ImageStorage;
 use Exception;
 use Nette\Http\FileUpload;
 use Nette\Utils\Image;
-use Ninjify\Nunjuck\TestCase\BaseTestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-final class ImageStorageTest extends BaseTestCase
+final class ImageStorageTest extends \Tester\TestCase
 {
 
 	/** @var ImageStorage */
 	private $storage;
+
 
 	public function setUp(): void
 	{
@@ -159,9 +161,6 @@ final class ImageStorageTest extends BaseTestCase
 			throw new Exception('Unable to save temporary test image!');
 		}
 	}
-
 }
 
-
-$test_case = new ImageStorageTest();
-$test_case->run();
+(new ImageStorageTest)->run();
