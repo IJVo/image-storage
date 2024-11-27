@@ -1,5 +1,5 @@
 {
-	"name": "contributte/image-storage",
+	"name": "ijvo/image-storage",
 	"type": "library",
 	"description": "Image storage for Nette framework",
 	"keywords": ["image", "nette", "storage", "crop", "resize", "upload"],
