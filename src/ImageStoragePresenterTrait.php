@@ -21,9 +21,9 @@ trait ImageStoragePresenterTrait
 	}
 
 
-	public function createTemplate(): ITemplate
+	public function createTemplate(?string $class = null): ITemplate
 	{
-		$template = parent::createTemplate();
+		$template = parent::createTemplate($class);
 
 		$template->imageStorage = $this->imageStorage;
 
